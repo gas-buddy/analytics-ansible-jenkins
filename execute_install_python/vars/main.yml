@@ -1,0 +1,29 @@
+---
+# vars file for execute_install_python
+dependencies:
+  - python-psycopg2
+  - git
+  - build-essential
+  - python-dev
+  - python-setuptools
+  - gfortran
+  - swig
+  - libatlas-dev
+  - liblapack-dev
+  - libfreetype6
+  - libfreetype6-dev
+  - graphviz
+  - libgraphviz-dev
+  - pandoc
+  - libxml2-dev
+  - libxslt-dev
+  - zlib1g-dev
+  - curl
+  - python-pip
+
+python_dependencies:
+  - numpy
+  - matplotlib
+  - numexpr
+  - Bottleneck
+  - pandas

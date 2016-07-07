@@ -1,0 +1,11 @@
+---
+# vars file for ec2_run_test
+dependencies:
+  - python-boto
+  - awscli
+file_source : Input
+file_destination : Output
+file_name : Input/price_hist_location_hx.2016-6-20-13-13.csv 
+download_bucket: load.stg.gasbuddy.io
+upload_bucket: load.stg.gasbuddy.io
+region: us-east-1

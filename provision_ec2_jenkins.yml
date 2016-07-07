@@ -1,0 +1,33 @@
+---
+- name: Begin
+  hosts: localhost
+  connection: local
+  gather_facts: smart
+  roles:
+    - {role: "provision_ec2"}
+ 
+- name: Enable pipelining on host for fast execution and switching to under-privileged user
+  hosts: launched #tag_Name_AnsibleAutoLaunchedTest
+  remote_user: bitnami
+  become: True
+  gather_facts: smart
+  roles:
+    - {role: "execute_enable_pipelining"}
+   
+- name: Install Python & configure Jenkins
+  hosts: launched #tag_Name_AnsibleAutoLaunchedTest
+  remote_user: bitnami
+  become: True
+  gather_facts: smart
+  roles:
+    - {role: "execute_install_python"}
+    - {role: "execute_setup_jenkins"}
+
+
+#- name: Begin
+#  hosts: localhost
+#  connection: local
+#  gather_facts: smart
+#  roles:
+#    - {role: "terminate_ec2"}
+

@@ -1,0 +1,74 @@
+---
+# tasks file for execute_setup_jenkins
+
+# 1. Changing password for the default "user" created by Bitnami.
+- name: Change Jenkins default password
+  command: ./bnconfig --userpassword {{jenkins.password}}
+  args:
+    chdir: "{{s3.path_jenkins}}"
+  become: true
+ 
+# 2. Install aws cli so that we can download files from S3.
+- name: Install awscli
+  apt: 
+    name: awscli
+    state: latest
+    update_cache: true
+
+# 3. Create the config directory for aws
+- name: Create directory /home/bitnami/.aws
+  file: path=~/.aws state=directory
+  become: true
+  become_user: tomcat
+  become_method: sudo
+
+# 4. Create the configuration file and store amazon credentials.
+- name: Configure aws credentials file at ~/.aws/conf
+  blockinfile:
+    dest: ~/.aws/config
+    create: yes
+    block: |
+      [default]
+      aws_access_key_id = {{aws.access_key}} 
+      aws_secret_access_key = {{aws.secret_key}} 
+      region= {{aws.region}}
+  become: true
+  become_user: tomcat
+  become_method: sudo
+
+# 5. Copys the files form S3 that will be needed to setup jenkins.
+- name: Copy stuff from Users, Jobs and jenkins-cli.jar from S3.
+  command: "{{ item }}"
+  register: s3_download
+  changed_when: "s3_download.stdout_lines[-1] is defined and s3_download.stdout_lines[-1] == 'changed'" 
+  when: item.state is undefined or item.state == 'present'
+  with_items:
+     - aws s3 cp s3://{{s3.path_jenkins_users_zip}} {{host.path_jenkins_home}}
+     - aws s3 cp s3://{{s3.path_jenkins_jobs_zip}} {{host.path_jenkins_home}}
+     - aws s3 cp s3://{{s3.path_jenkins_cli_jar}} {{host.path_jenkins_home}}
+  become: true
+  become_user: tomcat
+  become_method: sudo
+
+#6. Unarchive the data downloaded from S3
+- name: Unarchive the Users folder into jenkins_home
+  unarchive: src={{host.path_jenkins_home}}users.zip dest={{host.path_jenkins_home}} copy=no
+  become: true
+  become_user: tomcat
+  become_method: sudo
+
+#7. Unarchive the data downloaded from S3
+- name: Unarchive the Jobs folder into jenkins_home
+  unarchive: src={{host.path_jenkins_home}}jobs.zip dest={{host.path_jenkins_home}} copy=no
+  become: true
+  become_user: tomcat
+  become_method: sudo
+
+#8. Finally, configure jenkins and restart.
+- name: Log into Jenkins, install plugins, and at last restart Jenkins!
+  command: chdir={{host.path_jenkins_home}} {{ item }}
+  become: yes
+  with_items:
+   - java -jar jenkins-cli.jar -s http://localhost/jenkins login --username user --password gasbuddy123
+   - java -jar jenkins-cli.jar -s http://localhost/jenkins install-plugin ansible build-history-metrics-plugin build-metrics dashboard-view configurationslicing ec2-fleet emailext-template ec2-cloud-axis disk-usage metrics mission-control-view r workflow-aggregator package-parameter s3 saferestart slack ws-cleanup
+   - java -jar jenkins-cli.jar -s http://localhost/jenkins restart

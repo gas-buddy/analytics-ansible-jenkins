@@ -1,0 +1,9 @@
+---
+# tasks file for execute_enable_pipelining
+# The pipelining is advanced feature used by ansible for fast execution of ansible commands on the host
+# Read more at http://docs.ansible.com/ansible/intro_configuration.html#pipelining
+- name: Remove require tty /etc/sudoers.d
+  lineinfile: "dest=/etc/sudoers regexp='^\\s+\\w+\\s+requiretty' state=absent"
+
+- name: Remove require tty -alt from /etc/sudoers
+  lineinfile: "regexp='requiretty' dest=/etc/sudoers.d/os_defaults state=absent"

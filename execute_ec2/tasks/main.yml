@@ -1,0 +1,30 @@
+---
+# tasks file for ec2_run_test
+- name: apt-get update
+  apt: update_cache=yes
+    
+- name: install | dependencies
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: true
+    cache_valid_time: "{{ apt_update_cache_valid_time | default(3600) }}"
+  with_items: "{{dependencies}}" 
+  
+- name: Make Directory
+  file:
+   path: "{{file_source}}"
+   state: directory
+   mode: 0755
+   
+- name: Get file in s3 bucket
+  command: "aws s3 sync s3://{{download_bucket}}/{{file_source}}/ {{file_source}}/. --region {{region}}"
+  register: s3_download
+  changed_when: "s3_download.stdout_lines[-1] is defined and s3_download.stdout_lines[-1] == 'changed'"
+  when: item.state is undefined or item.state == 'present'
+ 
+- name: Write file to s3 bucket
+  command: "aws s3 cp {{file_source}}/. s3://{{upload_bucket}}/{{file_destination}}/ --exclude '*' --include '*.csv' --region {{region}} --recursive"
+  register: s3_upload
+  changed_when: "s3_upload.stdout_lines[-1] is defined and s3_upload.stdout_lines[-1] == 'changed'"
+  when: item.state is undefined or item.state == 'present'

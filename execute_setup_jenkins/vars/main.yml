@@ -1,0 +1,20 @@
+---
+# vars file for execute_setup_jenkins
+
+aws:
+  access_key: _AWS_Access_Key_
+  secret_key: _Your_AWS_SECRET_Key_
+  region: us-east-1
+  
+s3:
+  path_jenkins_users_zip: _Staging_S3_Host_/stg_ansible/jenkins-conf-backup/users.zip
+  path_jenkins_jobs_zip: _Staging_S3_Host_/stg_ansible/jenkins-conf-backup/jobs.zip
+  path_jenkins_cli_jar: _Staging_S3_Host_/ansible_playbooks/jenkins-data/jenkins-cli.jar
+  
+host:
+  path_jenkins_home: /home/bitnami/apps/jenkins/jenkins_home/
+  path_jenkins: /opt/bitnami/apps/jenkins
+  
+jenkins:
+  password: _password_for_the_new_jenkins_instance_
+  #the username will be "user"

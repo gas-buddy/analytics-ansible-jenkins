@@ -1,0 +1,39 @@
+---
+# tasks file for execute_install_python
+
+#1. Update the newly installed ec2 instance OS.
+- name: apt-get update
+  apt: update_cache=yes
+
+#2. Install all the dependencies for Python
+- name: install | dependencies
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: true
+    cache_valid_time: "{{ apt_update_cache_valid_time | default(3600) 
+}}"
+  with_items: "{{dependencies}}" 
+
+#3. Download boto3 from Github
+- git: repo=https://github.com/boto/boto3.git dest=/opt/boto3 clone=yes update=no
+
+#4. Build and install the Boto3 lib
+- name: Install Boto
+  command: chdir=/opt/boto3/ {{ item }}
+  become: yes
+  with_items:
+   - python setup.py build
+   - python setup.py install
+
+#5. Handle the strange error for the lib install
+- name: Link FreeType handle error case for matplotlib
+  file: src=/usr/include/freetype2/ft2build.h dest=/usr/include/ft2build.h state=link force=yes
+  #command: ln -s /usr/include/freetype2/ft2build.h /usr/include/
+  become: yes
+
+#6. Install python dependencies using pip
+- name: install pip | dependencies
+  pip:
+     name: "{{ item }}"
+  with_items: "{{python_dependencies}}"

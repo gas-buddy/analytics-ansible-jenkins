@@ -1,0 +1,12 @@
+---
+# defaults file for provision_ec2_test
+# ec2_instance_type: t2.nano
+# ec2_region: us-east-1
+# ec2_security_group: jenkins-autoprovision-ec2
+# ec2_image: ami-fce3c696
+# ec2_vpc: subnet-1d321144
+# ec2_keypair: mondelle
+# ec2_instance_profile_name: redshift-autoloader
+# ec2_count: 1
+# ec2_count_tag: counter
+# aws_resource_tags: AnsibleAutoLaunchedTest
